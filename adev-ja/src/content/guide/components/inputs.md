@@ -1,18 +1,14 @@
 # 入力プロパティによるデータの受け取り
 
-TIP: このガイドは、既に[基本概念ガイド](essentials)を読んでいることを前提としています。Angularを初めて使用する場合は、まずそちらをお読みください。
-
-TIP: 他のウェブフレームワークに精通している場合は、入力プロパティは_props_に似ています。
+TIP: このガイドは、既に[基本概念ガイド](essentials)を読んでいることを前提としています。Angularを初めて使用する場合は、まずそちらをお読みください。他のウェブフレームワークに精通している場合は、入力プロパティは_props_に似ています。
 
 コンポーネントを使用する際に、一般的にいくつかのデータを渡したいことがあります。
 コンポーネントは、**入力**を宣言することで、受け入れるデータを指定します。
 
-```ts {highlight:[8]}
+```ts {highlight:[6]}
 import {Component, input} from '@angular/core';
 
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomSlider {
   // Declare an input named 'value' with a default value of zero.
   value = input(0);
@@ -28,9 +24,7 @@ export class CustomSlider {
 入力にデフォルト値がある場合、TypeScriptはデフォルト値から型を推論します。
 
 ```ts
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomSlider {
   // TypeScriptは、この入力が数値であると推論し、InputSignal<number>を返します。
   value = input(0);
@@ -42,9 +36,7 @@ export class CustomSlider {
 デフォルト値のない入力が設定されていない場合、その値は`undefined`になります。
 
 ```ts
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomSlider {
   // `value`は設定されない可能性があるため、InputSignal<number | undefined>を生成します。
   value = input<number>();
@@ -59,16 +51,14 @@ export class CustomSlider {
 
 **入力名は大文字と小文字が区別されます。**
 
-## 入力の読み取り
+## 入力の読み取り {#reading-inputs}
 
 `input`関数は`InputSignal`を返します。シグナルを呼び出すことで値を読み取ることができます。
 
-```ts {highlight:[11]}
+```ts {highlight:[9]}
 import {Component, input, computed} from '@angular/core';
 
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomSlider {
   // Declare an input named 'value' with a default value of zero.
   value = input(0);
@@ -80,14 +70,12 @@ export class CustomSlider {
 
 `input`関数によって作成されたシグナルは読み取り専用です。
 
-## 必須入力
+## 必須入力 {#required-inputs}
 
 `input`の代わりに`input.required`を呼び出すことで、入力が`required`であることを宣言できます。
 
-```ts {highlight:[6]}
-@Component({
-  /*...*/
-})
+```ts {highlight:[4]}
+@Component(/* ... */)
 export class CustomSlider {
   // Declare a required input named value. Returns an `InputSignal<number>`.
   value = input.required<number>();
@@ -98,11 +86,11 @@ Angularは、テンプレートでコンポーネントを使用する際に、�
 
 必須入力は、返される`InputSignal`のジェネリックパラメーターに`undefined`を自動的に含めません。
 
-## 入力の構成
+## 入力の構成 {#configuring-inputs}
 
 `input`関数は、入力の動作を変更できる2番目のパラメーターとしてconfigオブジェクトを受け取ります。
 
-### 入力変換
+### 入力変換 {#input-transforms}
 
 入力がAngularによって設定されるときに、その値を変更する`transform`関数を指定できます。
 
@@ -132,14 +120,12 @@ function trimString(value: string | undefined): string {
 
 **入力変換関数は常に[純粋関数](https://en.wikipedia.org/wiki/Pure_function)でなければなりません。**変換関数外の状態に依存すると、予期せぬ動作につながる可能性があります。
 
-#### 型チェック
+#### 型チェック {#type-checking}
 
 入力変換を指定すると、変換関数の引数の型によって、テンプレートで入力に設定できる値の型が決まります。
 
-<docs-code language="ts">
-@Component({
-  /*...*/
-})
+```ts
+@Component(/* ... */)
 export class CustomSlider {
   widthPx = input('', {transform: appendPx});
 }
@@ -147,20 +133,18 @@ export class CustomSlider {
 function appendPx(value: number): string {
   return `${value}px`;
 }
-</docs-code>
+```
 
 上記の例では、`widthPx`入力は`number`を受け入れる一方、`InputSignal`プロパティは`string`を返します。
 
-#### 組み込み変換
+#### 組み込み変換 {#built-in-transformations}
 
 Angularには、最も一般的な2つのシナリオのための2つの組み込み変換関数が含まれています。ブール値と数値への値の強制変換です。
 
 ```ts
 import {Component, input, booleanAttribute, numberAttribute} from '@angular/core';
 
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomSlider {
   disabled = input(false, {transform: booleanAttribute});
   value = input(0, {transform: numberAttribute});
@@ -172,14 +156,12 @@ export class CustomSlider {
 
 `numberAttribute`は、与えられた値を数値として解析しようと試み、解析に失敗した場合は`NaN`を生成します。
 
-### 入力エイリアス
+### 入力エイリアス {#input-aliases}
 
 `alias`オプションを指定して、テンプレートでの入力の名前を変更できます。
 
-```ts {highlight:[5]}
-@Component({
-  /*...*/
-})
+```ts {highlight:[3]}
+@Component(/* ... */)
 export class CustomSlider {
   value = input(0, {alias: 'sliderValue'});
 }
@@ -193,7 +175,7 @@ export class CustomSlider {
 
 一般的にコンポーネントの入力をエイリアス化することは避けるべきですが、この機能は、元の名前のエイリアスを保持しながらプロパティの名前を変更したり、ネイティブDOM要素プロパティの名前との競合を回避したりする場合に役立ちます。
 
-## モデル入力
+## モデル入力 {#model-inputs}
 
 **モデル入力**は、コンポーネントが新しい値を親コンポーネントに伝播できるようにする特殊なタイプの入力です。
 
@@ -202,9 +184,7 @@ export class CustomSlider {
 どちらの種類の入力も、値をプロパティにバインドすることを可能にします。しかし、**モデル入力は、コンポーネントの作者がプロパティに値を書き込むことを可能にします。**プロパティが双方向バインディングでバインドされている場合、新しい値はそのバインディングに伝播します。
 
 ```ts
-@Component({
-  /* ... */
-})
+@Component(/* ... */)
 export class CustomSlider {
   // "value"という名前のモデル入力を定義します。
   value = model(0);
@@ -234,7 +214,7 @@ export class MediaControls {
 
 テンプレートでの双方向バインディングの詳細については、[双方向バインディング](guide/templates/two-way-binding)を参照してください。
 
-### プレーンプロパティとの双方向バインディング
+### プレーンプロパティとの双方向バインディング {#two-way-binding-with-plain-properties}
 
 プレーンなJavaScriptプロパティをモデル入力にバインドできます。
 
@@ -252,14 +232,12 @@ export class MediaControls {
 
 上記の例では、`CustomSlider`は`value`モデル入力に値を書き込むことができ、それによって`MediaControls`の`volume`プロパティに値が伝播します。このバインディングにより、`value`と`volume`の値が同期します。
 
-### 暗黙的な`change`イベント
+### 暗黙的な`change`イベント {#implicit-change-events}
 
 コンポーネントまたはディレクティブでモデル入力を宣言すると、Angularはそのモデルに対応する[出力](guide/components/outputs)を自動的に作成します。出力の名前は、モデル入力の名前に「Change」が付いたものです。
 
 ```ts
-@Directive({
-  /* ... */
-})
+@Directive(/* ... */)
 export class CustomCheckbox {
   // これにより、「checkedChange」という名前の出力が自動的に作成されます。
   // テンプレートで `(checkedChange)="handler()"` を使用して購読できます。
@@ -271,13 +249,13 @@ export class CustomCheckbox {
 
 出力の詳細については、[出力によるカスタムイベント](guide/components/outputs)を参照してください。
 
-### モデル入力のカスタマイズ
+### モデル入力のカスタマイズ {#customizing-model-inputs}
 
-[通常の入力](guide/components/inputs)と同様に、モデル入力を必須としてマークしたり、エイリアスを提供したりできます。
+標準入力と同様に、モデル入力を[必須](#required-inputs)としてマークしたり、[エイリアス](#input-aliases)を提供したりできます。
 
 モデル入力は入力変換をサポートしません。
 
-### モデル入力を使用する場合
+### モデル入力を使用する場合 {#when-to-use-model-inputs}
 
 コンポーネントが双方向バインディングをサポートする場合に、モデル入力を使用します。これは通常、ユーザーの操作に基づいて値を変更するためにコンポーネントが存在する場合に適しています。最も一般的には、日付ピッカーやコンボボックスなどのカスタムフォームコントロールは、主要な値にモデル入力を使用する必要があります。
 
@@ -293,10 +271,8 @@ TIP: Angularチームは新しいプロジェクトにはシグナルベース�
 
 コンポーネント入力を宣言する代わりに、プロパティに`@Input`デコレーターを追加できます。
 
-```ts {highlight:[5]}
-@Component({
-  /*...*/
-})
+```ts {highlight:[3]}
+@Component(/* ... */)
 export class CustomSlider {
   @Input() value = 0;
 }
@@ -308,18 +284,16 @@ export class CustomSlider {
 <custom-slider [value]="50" />
 ```
 
-### デコレーターベースの入力のカスタマイズ
+### デコレーターベースの入力のカスタマイズ {#customizing-decorator-based-inputs}
 
 `@Input`デコレーターは、入力の動作を変更できるconfigオブジェクトを受け取ります。
 
-#### 必須入力
+#### 必須入力 {#required-inputs}
 
 `required`オプションを指定して、特定の入力が常に値を持つ必要があることを強制できます。
 
-```ts {highlight:[5]}
-@Component({
-  /*...*/
-})
+```ts {highlight:[3]}
+@Component(/* ... */)
 export class CustomSlider {
   @Input({required: true}) value = 0;
 }
@@ -327,7 +301,7 @@ export class CustomSlider {
 
 すべての必須入力を指定せずにコンポーネントを使用しようとすると、Angularはビルド時にエラーを報告します。
 
-#### 入力変換
+#### 入力変換 {#input-transforms}
 
 Angularによって入力が設定されるときにその値を変更する`transform`関数を指定できます。この変換関数は、上記で説明したシグナルベースの入力の変換関数と同様に機能します。
 
@@ -345,14 +319,12 @@ function trimString(value: string | undefined) {
 }
 ```
 
-#### 入力エイリアス
+#### 入力エイリアス {#input-aliases}
 
 `alias`オプションを指定して、テンプレートでの入力の名前を変更できます。
 
-```ts {highlight:[5]}
-@Component({
-  /*...*/
-})
+```ts {highlight:[3]}
+@Component(/* ... */)
 export class CustomSlider {
   @Input({alias: 'sliderValue'}) value = 0;
 }
@@ -366,7 +338,7 @@ export class CustomSlider {
 
 入力エイリアスは、上記で説明したシグナルベースの入力と同じように機能します。
 
-### ゲッターとセッターを持つ入力
+### ゲッターとセッターを持つ入力 {#inputs-with-getters-and-setters}
 
 デコレーターベースの入力を使用する場合、ゲッターとセッターで実装されたプロパティを入力にできます。
 
@@ -402,7 +374,7 @@ export class CustomSlider {
 
 複雑なゲッターとセッター、またはコストの高いゲッターとセッターは避けてください。Angularは入力のセッターを複数回呼び出す可能性があり、セッターがDOM操作などのコストの高い処理を実行する場合、アプリケーションのパフォーマンスに悪影響を与える可能性があります。
 
-## `@Component`デコレーターでの入力の指定
+## `@Component`デコレーターでの入力の指定 {#specify-inputs-in-the-component-decorator}
 
 `@Input`デコレーターに加えて、`@Component`デコレーターの`inputs`プロパティを使用して、コンポーネントの入力を指定できます。これは、コンポーネントが基本クラスからプロパティを継承する場合に役立ちます。
 

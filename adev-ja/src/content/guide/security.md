@@ -49,7 +49,7 @@ Angularは、XSSのバグを体系的に阻止するために、すべての値�
 これらのWebプラットフォーム機能は、DOMレベルで動作するため、XSSの問題を防ぐための最も効果的な手段です。これにより、他の低レベルAPIを使用したバイパスはできません。
 そのため、これらの機能を活用することを強くお勧めします。これを行うには、アプリケーションの[コンテンツセキュリティポリシー](#content-security-policy)を構成し、[Trusted Typesの強制](#enforcing-trusted-types)を有効にします。
 
-### サニタイズとセキュリティコンテキスト {#sanitization-and-security-context}
+### サニタイズとセキュリティコンテキスト {#sanitization-and-security-contexts}
 
 _サニタイズ_とは、信頼されていない値を検査して、DOMに挿入しても安全な値に変換することです。
 多くの場合、サニタイズは値をまったく変更しません。
@@ -68,7 +68,7 @@ Angularは、次のセキュリティコンテキストを定義しています�
 Angularは、信頼されていない値をHTMLとURLに対してサニタイズします。リソースURLのサニタイズは、リソースURLに任意のコードが含まれているため、不可能です。
 開発モードでは、Angularはサニタイズ中に値を変更する必要がある場合、コンソールに警告を表示します。
 
-### サニタイズの例
+### サニタイズの例 {#sanitization-example}
 
 次のテンプレートは、`htmlSnippet`の値をバインディングします。1つは要素の内容に補間して、もう1つは要素の`innerHTML`プロパティにバインディングします。
 
@@ -86,7 +86,7 @@ Angularは、値を安全ではないと認識し、自動的にサニタイズ�
 
 <img alt="補間されたHTML値とバインディングされたHTML値を示すスクリーンショット" src="assets/images/guide/security/binding-inner-html.png#small">
 
-### DOM APIの直接使用と明示的なサニタイズ呼び出し
+### DOM APIの直接使用と明示的なサニタイズ呼び出し {#direct-use-of-the-dom-apis-and-explicit-sanitization-calls}
 
 信頼済みタイプを強制しない限り、組み込みのブラウザDOM APIは、セキュリティの脆弱性から自動的に保護しません。
 たとえば、`document`、`ElementRef`を通じてアクセスできるノード、および多くのサードパーティAPIには、安全ではないメソッドが含まれています。
@@ -369,17 +369,17 @@ Angularの`HttpClient`ライブラリは、この規則を認識し、さらに�
 
 ## Preventing Server-Side Request Forgery (SSRF)
 
-Angular includes strict validation for `Host`, `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Forwarded-Prefix` and `X-Forwarded-Port` headers in the request handling pipeline to prevent header-based [Server-Side Request Forgery (SSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/SSRF).
+Angular includes strict validation for `Host`, `Forwarded`, `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Forwarded-Prefix`, and `X-Forwarded-Port` headers in the request handling pipeline to prevent header-based [Server-Side Request Forgery (SSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/SSRF).
 
 The validation rules are:
 
-- `Host` and `X-Forwarded-Host` headers are validated against a strict allowlist and cannot contain path separators.
+- `Host`, `X-Forwarded-Host`, and the `host` parameter of the `Forwarded` header are validated against a strict allowlist and cannot contain path separators.
 - `X-Forwarded-Port` header must be numeric.
-- `X-Forwarded-Proto` header must be `http` or `https`.
+- `X-Forwarded-Proto` header and the `proto` parameter of the `Forwarded` header must be `http` or `https`.
 - `X-Forwarded-Prefix` header must start with `/` and contain only alphanumeric characters, hyphens, and underscores, separated by single slashes.
-- By default, all `X-Forwarded-*` headers are treated as untrusted and are removed from the request. To retain them, they must be explicitly allowed by configuring `trustProxyHeaders`.
+- By default, the `Forwarded` header and all `X-Forwarded-*` headers are treated as untrusted and are removed from the request. To retain them, they must be explicitly allowed by configuring `trustProxyHeaders`.
 
-Invalid headers trigger an error log, and unallowed proxy headers are removed from the request. Requests with unrecognized hostnames will result in a `400 Bad Request` is issued.
+Invalid headers trigger an error log, and unallowed proxy headers are removed from the request. Requests with unrecognized hostnames will result in a `400 Bad Request`.
 
 NOTE: Most cloud providers and CDN providers perform automatic validation of these headers before a request ever reaches the application origin. This inherent filtering significantly reduces the practical attack surface.
 
@@ -436,21 +436,27 @@ IMPORTANT: You can use `*` as a value in `allowedHosts` to allow all hostnames, 
 
 ### Configuring trusted proxy headers
 
-By default, Angular ignores all `X-Forwarded-*` headers. If your application is behind a trusted reverse proxy (like a load balancer) that sets these headers, you can configure Angular to trust them.
+By default, Angular ignores the standard `Forwarded` header and all `X-Forwarded-*` headers. If your application is behind a trusted reverse proxy (like a load balancer) that sets these headers, you can configure Angular to trust them.
+
+If the `Forwarded` header is trusted, its `host` and `proto` parameters are extracted and take precedence over the corresponding `x-forwarded-host` and `x-forwarded-proto` headers.
 
 You can configure `trustProxyHeaders` when initializing the application engine:
 
 ```typescript
 const appEngine = new AngularAppEngine({
-  trustProxyHeaders: ['x-forwarded-host', 'x-forwarded-proto'], // Trust specific headers
+  trustProxyHeaders: ['forwarded'], // Trust the standard Forwarded header
+});
+
+const appEngine = new AngularAppEngine({
+  trustProxyHeaders: ['x-forwarded-host', 'x-forwarded-proto'], // Trust non-standard headers
 });
 
 const nodeAppEngine = new AngularNodeAppEngine({
-  trustProxyHeaders: true, // Trust all X-Forwarded-* headers
+  trustProxyHeaders: true, // Trust standard Forwarded and all X-Forwarded-* headers
 });
 ```
 
-For the Node.js variant `AngularNodeAppEngine`, you can also provide the `NG_TRUST_PROXY_HEADERS` environment variable (with comma-separated list of headers as a value) to allow the usage of these headers.
+For the Node.js variant `AngularNodeAppEngine`, you can also provide the `NG_TRUST_PROXY_HEADERS` environment variable (with a comma-separated list of headers as a value) to allow the usage of these headers.
 
 ```bash {hideDollar}
 export NG_TRUST_PROXY_HEADERS="X-FORWARDED-HOST,X-FORWARDED-PREFIX"

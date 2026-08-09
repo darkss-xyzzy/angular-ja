@@ -140,16 +140,14 @@ export class UserProfile {}
 
 **クエリはコンポーネントの境界を貫通することはありません。**コンテンツクエリは、コンポーネント自体と同じテンプレートからの結果のみを取得できます。
 
-## 必須クエリ
+## 必須クエリ {#required-queries}
 
 子クエリ（`viewChild`または`contentChild`）が結果を見つけられない場合、その値は`undefined`になります。これは、ターゲット要素が`@if`や`@for`などの制御フロー文によって非表示になっている場合に発生する可能性があります。このため、子クエリは`undefined`を含む値型を持つシグナルを返します。
 
 場合によっては、特に`viewChild`を使用する場合、特定の子が常に利用可能であることが確実な場合があります。他の場合では、特定の子が存在することを厳格に適用したい場合があります。これらの場合、_必須クエリ_を使用できます。
 
 ```ts
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomCard {
   header = viewChild.required(CustomCardHeader);
   body = contentChild.required(CustomCardBody);
@@ -158,7 +156,7 @@ export class CustomCard {
 
 必須クエリが一致する結果を見つけられない場合、Angularはエラーを報告します。これは結果が利用可能であることを保証するため、必須クエリは自動的にシグナルの値型に`undefined`を含めません。
 
-## クエリロケーター
+## クエリロケーター {#query-locators}
 
 各クエリデコレーターの最初の引数は、その**ロケーター**です。
 
@@ -184,7 +182,7 @@ export class ActionBar {
 
 Angularは、CSSセレクターをクエリロケーターとしてサポートしていません。
 
-### クエリとインジェクターツリー
+### クエリとインジェクターツリー {#queries-and-the-injector-tree}
 
 TIP: プロバイダーとAngularのインジェクションツリーについては、[依存性の注入](guide/di)を参照してください。
 
@@ -199,7 +197,7 @@ const SUB_ITEM = new InjectionToken<string>('sub-item');
 })
 export class SpecialItem {}
 
-@Component({/*...*/})
+@Component(/* ... */)
 export class CustomList {
   subItemType = contentChild(SUB_ITEM);
 }
@@ -207,18 +205,16 @@ export class CustomList {
 
 上記の例では、ロケーターとして`InjectionToken`を使用していますが、任意の`ProviderToken`を使用して特定の要素を見つけることができます。
 
-## クエリオプション
+## クエリオプション {#query-options}
 
 すべてのクエリ関数は、第2引数としてオプションオブジェクトを受け取ります。これらのオプションは、クエリが結果を見つける方法を制御します。
 
-### 要素のインジェクターからの特定の値の読み取り
+### 要素のインジェクターからの特定の値の読み取り {#reading-specific-values-from-an-elements-injector}
 
 デフォルトでは、クエリロケーターは、検索対象の要素と取得される値の両方を示します。代わりに、`read`オプションを指定して、ロケーターによって一致した要素から別の値を取得できます。
 
 ```ts
-@Component({
-  /*...*/
-})
+@Component(/* ... */)
 export class CustomExpando {
   toggle = contentChild(ExpandoContent, {read: TemplateRef});
 }
@@ -229,7 +225,7 @@ export class CustomExpando {
 
 開発者は、`read`を使用して`ElementRef`と`TemplateRef`を取得することが最も一般的です。
 
-### コンテンツの子孫
+### コンテンツの子孫 {#content-descendants}
 
 デフォルトでは、`contentChildren`クエリはコンポーネントの直接の子要素のみを検索し、子孫要素にはトラバースしません。
 一方、`contentChild`クエリはデフォルトで子孫要素も検索します。
@@ -261,7 +257,7 @@ export class UserProfile { }
 
 ビュークエリにはこのオプションはありません。これは、常に子孫をトラバースするためです。
 
-## デコレーターベースのクエリ
+## デコレーターベースのクエリ {#decorator-based-queries}
 
 TIP: Angularチームは新規プロジェクトにはシグナルベースのクエリ関数の使用を推奨していますが、
 元のデコレーターベースのクエリAPIは引き続き完全にサポートされています。
@@ -335,10 +331,10 @@ export class CustomCard {
 
 `@ContentChild`デコレーターを使用して、単一の結果をクエリできます。
 
-```angular-ts {highlight: [15, 16, 17, 18, 19, 26]}
+```angular-ts {highlight: [14, 16, 17, 18]}
 @Component({
   selector: 'custom-toggle',
-  /* ... */
+  /*...*/
 })
 export class CustomToggle {
   text: string;
@@ -346,10 +342,9 @@ export class CustomToggle {
 
 @Component({
   selector: 'custom-expando',
-  /* ... */
+  /*...*/
 })
-
-export class CustomExpando {
+export class CustomExpando implements AfterContentInit {
   @ContentChild(CustomToggle) toggle: CustomToggle;
 
   ngAfterContentInit() {
@@ -363,9 +358,9 @@ export class CustomExpando {
     <custom-expando>
       <custom-toggle>Show</custom-toggle>
     </custom-expando>
-  `
+  `,
 })
-export class UserProfile { }
+export class UserProfile {}
 ```
 
 この例では、`CustomExpando`コンポーネントは子`CustomToggle`をクエリし、`ngAfterContentInit`で結果にアクセスしています。
@@ -376,10 +371,10 @@ Angularは、アプリケーションの状態が変化するにつれて`@Conte
 
 `@ContentChildren`デコレーターを使用して、複数の結果をクエリできます。
 
-```angular-ts {highlight: [15, 17, 18, 19, 20, 21]}
+```angular-ts {highlight: [14, 16, 17, 18, 19, 20]}
 @Component({
   selector: 'custom-menu-item',
-  /* ... */
+  /*...*/
 })
 export class CustomMenuItem {
   text: string;
@@ -387,14 +382,13 @@ export class CustomMenuItem {
 
 @Component({
   selector: 'custom-menu',
-  /* ... */
+  /*...*/
 })
-
-export class CustomMenu {
+export class CustomMenu implements AfterContentInit {
   @ContentChildren(CustomMenuItem) items: QueryList<CustomMenuItem>;
 
   ngAfterContentInit() {
-    this.items.forEach(item => {
+    this.items.forEach((item) => {
       console.log(item.text);
     });
   }
@@ -407,18 +401,18 @@ export class CustomMenu {
       <custom-menu-item>Cheese</custom-menu-item>
       <custom-menu-item>Tomato</custom-menu-item>
     </custom-menu>
-  `
+  `,
 })
-export class UserProfile { }
+export class UserProfile {}
 ```
 
 `@ContentChildren`は、クエリ結果を含む`QueryList`オブジェクトを作成します。`changes`プロパティを使用して、時間の経過とともにクエリ結果の変更を購読できます。
 
-### デコレーターベースのクエリオプション
+### デコレーターベースのクエリオプション {#decorator-based-query-options}
 
 すべてのクエリデコレーターは、第2引数としてオプションオブジェクトを受け取ります。これらのオプションは、シグナルベースのクエリと同じように動作しますが、下記で説明する点を除きます。
 
-### 静的クエリ
+### 静的クエリ {#static-queries}
 
 `@ViewChild`と`@ContentChild`デコレーターは、`static`オプションを受け取ります。
 
@@ -442,7 +436,7 @@ export class CustomCard {
 
 `static`オプションは、`@ViewChildren`と`@ContentChildren`クエリでは使用できません。
 
-### QueryListの使用
+### QueryListの使用 {#using-querylist}
 
 `@ViewChildren`と`@ContentChildren`はどちらも、結果のリストを含む`QueryList`オブジェクトを提供します。
 
@@ -450,7 +444,7 @@ export class CustomCard {
 
 `changes`プロパティを購読して、結果が変更されるたびに何かを実行できます。
 
-## 一般的なクエリの落とし穴
+## 一般的なクエリの落とし穴 {#common-query-pitfalls}
 
 クエリを使用する際、一般的な落とし穴により、コードの理解と保守が難しくなる可能性があります。
 
